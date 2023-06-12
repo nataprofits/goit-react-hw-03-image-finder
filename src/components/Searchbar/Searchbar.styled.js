@@ -64,7 +64,3 @@ export const Button = styled.button`
   background-color: #3f51b5;
 `;
 
-// export const SearchIcon = styled(IoSearchCircleOutline)`
-//   width: 35px;
-//   height: 35px;
-// `;
