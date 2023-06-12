@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import { ModalWindow } from 'components/Modal/Modal';
+import{ Item, Img} from './ImageGalleryItem.styled'
 
 export class ImageGalleryItem extends Component {
   state = {
@@ -13,26 +14,23 @@ export class ImageGalleryItem extends Component {
   onModalClose = () => {
     this.setState({ isModalOpen: false });
   };
-  
+
   render() {
     const { isModalOpen } = this.state;
-    console.log(isModalOpen);
     const { smallImage, largeImage, description } = this.props;
     return (
       <>
-        <li>
-          <img
-            src={smallImage}
-            alt={description}
-            onClick={this.onModalOpen}
+        <Item>
+          <Img src={smallImage} alt={description} onClick={this.onModalOpen} />
+        </Item>
+        {isModalOpen && (
+          <ModalWindow
+            isOpen={isModalOpen}
+            largeImage={largeImage}
+            description={description}
+            closeModal={this.onModalClose}
           />
-        </li>
-        {isModalOpen && <ModalWindow
-          isOpen={isModalOpen}
-          largeImage={largeImage}
-          description={description}
-          closeModal={this.onModalClose}
-        />}
+        )}
       </>
     );
   }

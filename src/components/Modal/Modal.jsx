@@ -1,8 +1,5 @@
 import Modal from 'react-modal';
-import {
-  disableBodyScroll,
-  enableBodyScroll,
-} from 'body-scroll-lock';
+import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock';
 
 const customStyles = {
   content: {
@@ -28,7 +25,6 @@ const customStyles = {
 Modal.setAppElement('#root');
 
 export function ModalWindow({ isOpen, closeModal, description, largeImage }) {
-
   return (
     <div>
       <Modal

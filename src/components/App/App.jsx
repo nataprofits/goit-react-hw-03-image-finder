@@ -2,9 +2,9 @@ import { Component } from 'react';
 import { BtnLoadMore } from '../Button/Button';
 import { ImageGallery } from '../ImageGallery/ImageGallery';
 import { MagnifyingGlass } from 'react-loader-spinner';
-import { SearchBar } from '../Searchbar/Searchbar';
 import { getImages } from '../service/api';
 import css from '../../../src/styles.css';
+import Searchbar from 'components/Searchbar/Searchbar';
 
 export class App extends Component {
   abortCtrl;
@@ -30,7 +30,7 @@ export class App extends Component {
           this.setState({ list: images.hits, totalHits: images.totalHits });
         } else {
           this.setState({
-            error: `No images found for ${listName}!`,
+            error: `No images found for "${listName}"!`,
           });
         }
       } catch (error) {
@@ -49,12 +49,12 @@ export class App extends Component {
         isLoading: true,
         error: null,
       });
-      const images = await getImages(listName, page +1, {
+      const images = await getImages(listName, page + 1, {
         signal: this.abortCtrl.signal,
       });
       this.setState(prevState => ({
         list: [...prevState.list, ...images.hits],
-        page: prevState.page +1,
+        page: prevState.page + 1,
       }));
     } catch (error) {
       this.setState({ error: error.message });
@@ -71,9 +71,7 @@ export class App extends Component {
     const { list, isLoading, error, totalHits } = this.state;
     return (
       <div>
-        <SearchBar
-          onSubmit={this.handleListNameSubmit}
-        />
+        <Searchbar onSubmit={this.handleListNameSubmit} />
         {error && <h1 className={css.error}>{error}</h1>}
         {isLoading && (
           <div>
