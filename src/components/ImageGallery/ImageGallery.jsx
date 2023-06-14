@@ -1,19 +1,22 @@
-import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
-import {List} from '../ImageGallery/ImageGallery.styled'
+import PropTypes from 'prop-types';
+import { ImageGalleryItem } from '../ImageGalleryItem/ImageGalleryItem';
+import { ImageList } from './ImageGallery.styled';
 
-export function ImageGallery({ list }) {
+ const ImageGallery = ({ images }) => {
   return (
-    <>
-      <List>
-        {list.map(item => (
-          <ImageGalleryItem
-            key={item.id}
-            smallImage={item.webformatURL}
-            description={item.tags}
-            largeImage={item.largeImageURL}
-          />
-        ))}
-      </List>
-    </>
+    <ImageList>
+      {images.map(image => (
+        <ImageGalleryItem key={image.id} image={image} />
+      ))}
+    </ImageList>
   );
-}
+};
+
+ImageGallery.propTypes = {
+  images: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+    }).isRequired
+  ).isRequired,
+};
+export default ImageGallery

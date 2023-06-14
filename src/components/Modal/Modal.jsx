@@ -1,41 +1,51 @@
-import Modal from 'react-modal';
+import ReactModal from 'react-modal';
+import PropTypes from 'prop-types';
 import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock';
 
 const customStyles = {
-  content: {
-    width: '1000px',
-    border: 'none',
-    backgroundColor: 'transparent',
-    inset: 'auto',
-  },
   overlay: {
     position: 'fixed',
-    top: '0',
-    left: '0',
+    top: 0,
+    left: 0,
     width: '100vw',
     height: '100vh',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    zIndex: '1200',
+    zIndex: 1200,
+  },
+  content: {
+    backgroundColor: 'transparent',
+    maxWidth: 'calc(100vw - 48px)',
+    maxHeight: 'calc(100vh - 24px)',
+    padding: 0,
+    border: 'none',
+    position: 'static',
+    borderRadius: 0,
+    overflow: 'hidden',
   },
 };
 
-Modal.setAppElement('#root');
+ReactModal.setAppElement('#root');
 
-export function ModalWindow({ isOpen, closeModal, description, largeImage }) {
+export const Modal = ({ isOpen, largeImageURL, tags, onClose }) => {
   return (
-    <div>
-      <Modal
-        isOpen={isOpen}
-        onRequestClose={closeModal}
-        style={customStyles}
-        onAfterOpen={() => disableBodyScroll(document)}
-        onAfterClose={() => enableBodyScroll(document)}
-      >
-        <img src={largeImage} alt={description} />
-      </Modal>
-    </div>
+    <ReactModal
+      style={customStyles}
+      isOpen={isOpen}
+      onRequestClose={onClose}
+      onAfterOpen={() => disableBodyScroll(document)}
+      onAfterClose={() => enableBodyScroll(document)}
+    >
+      <img src={largeImageURL} alt={tags} />
+    </ReactModal>
   );
-}
+};
+
+Modal.propTypes = {
+  largeImageURL: PropTypes.string.isRequired,
+  tags: PropTypes.string.isRequired,
+  onClose: PropTypes.func.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+};

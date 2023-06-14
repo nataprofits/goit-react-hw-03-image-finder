@@ -1,60 +1,75 @@
+
 import { Component } from 'react';
-import { BtnLoadMore } from '../Button/Button';
-import { ImageGallery } from '../ImageGallery/ImageGallery';
-import { MagnifyingGlass } from 'react-loader-spinner';
-import { getImages } from '../service/api';
-import css from '../../../src/styles.css';
+import { ToastContainer, toast } from 'react-toastify';
+import { getImagesAPI } from '../service/api';
+import { normalizeHits } from '../utils/normalizeHits';
+import { Button } from '../Button/Button';
+import { Wrapper, Error } from './App.styled';
+import 'react-toastify/dist/ReactToastify.css';
 import Searchbar from 'components/Searchbar/Searchbar';
+import Loader from 'components/Loader/Loader';
+import ImageGallery from 'components/ImageGallery/ImageGallery';
 
 export class App extends Component {
   abortCtrl;
+
   state = {
-    listName: '',
-    list: [],
-    isLoading: false,
+    images: [],
+    query: '',
+    currentPage: 1,
     error: null,
-    page: 1,
-    totalHits: null,
+    isLoading: false,
+    isLastPage: false,
   };
 
-  async componentDidUpdate(_, prevState) {
-    const { listName, page } = this.state;
-    if (prevState.listName !== this.state.listName) {
-      this.abortCtrl = new AbortController();
-      try {
-        this.setState({ isLoading: true, error: null });
-        const images = await getImages(listName, page, {
-          signal: this.abortCtrl.signal,
-        });
-        if (images.hits.length) {
-          this.setState({ list: images.hits, totalHits: images.totalHits });
-        } else {
-          this.setState({
-            error: `No images found for "${listName}"!`,
-          });
-        }
-      } catch (error) {
-        this.setState({ error: error.message });
-      } finally {
-        this.setState({ isLoading: false });
-      }
+  componentDidUpdate(_, prevState) {
+    if (
+      prevState.query !== this.state.query ||
+      prevState.currentPage !== this.state.currentPage
+    ) {
+      this.getImages();
     }
   }
 
-  handleBtnMoreClick = async () => {
-    const { listName, page } = this.state;
+  getImages = async () => {
+    const { query, currentPage } = this.state;
+
+    if (this.abortCtrl) {
+      this.abortCtrl.abort();
+    }
+
     this.abortCtrl = new AbortController();
+
     try {
-      this.setState({
-        isLoading: true,
-        error: null,
-      });
-      const images = await getImages(listName, page + 1, {
-        signal: this.abortCtrl.signal,
-      });
+      this.setState({ isLoading: true });
+
+      const data = await getImagesAPI(
+        query,
+        currentPage,
+        this.abortCtrl.signal
+      );
+
+      if (data.hits.length === 0) {
+        return toast.info('Sorry, no images for your query...', {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      } else if (currentPage === 1) {
+        toast.success('Wow! We found some images for you!', {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      } else {
+        toast.success('Wow! We found some more images for you!', {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      }
+
+      const normalizedHits = normalizeHits(data.hits);
+
       this.setState(prevState => ({
-        list: [...prevState.list, ...images.hits],
-        page: prevState.page + 1,
+        images: [...prevState.images, ...normalizedHits],
+        isLastPage:
+          prevState.images.length + normalizedHits.length >= data.totalHits,
+        error: null,
       }));
     } catch (error) {
       this.setState({ error: error.message });
@@ -63,26 +78,44 @@ export class App extends Component {
     }
   };
 
-  handleListNameSubmit = listName => {
-    this.setState({ listName, list: [], page: 1 });
+  handleSearchSubmit = query => {
+    if (this.state.query === query) {
+      return;
+    }
+
+    this.setState({
+      query,
+      currentPage: 1,
+      images: [],
+      error: null,
+      isLastPage: false,
+    });
+  };
+
+  loadMore = () => {
+    this.setState(prevState => ({
+      currentPage: prevState.currentPage + 1,
+    }));
   };
 
   render() {
-    const { list, isLoading, error, totalHits } = this.state;
+    const { images, isLoading, error, isLastPage } = this.state;
+
     return (
-      <div>
-        <Searchbar onSubmit={this.handleListNameSubmit} />
-        {error && <h1 className={css.error}>{error}</h1>}
-        {isLoading && (
-          <div>
-            <MagnifyingGlass height="80" width="80" />
-          </div>
+      <Wrapper>
+        <ToastContainer autoClose={2500} />
+        <Searchbar onSubmit={this.handleSearchSubmit}/>
+
+        {error && <Error>Error: {error}</Error>}
+
+        <ImageGallery images={images}/>
+
+        {isLoading && <Loader />}
+
+        {!isLoading && images.length > 0 && !isLastPage && (
+          <Button onClick={this.loadMore} />
         )}
-        <ImageGallery list={list} />
-        {!isLoading && totalHits > 12 && !error && (
-          <BtnLoadMore onClick={this.handleBtnMoreClick} />
-        )}
-      </div>
+      </Wrapper>
     );
   }
 }
