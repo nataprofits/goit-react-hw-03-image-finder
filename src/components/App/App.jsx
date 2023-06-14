@@ -54,7 +54,7 @@ export class App extends Component {
           position: toast.POSITION.TOP_RIGHT,
         });
       } else if (currentPage === 1) {
-        toast.success('Wow! We found some images for you!', {
+        toast.info('Wow! We found some images for you!', {
           position: toast.POSITION.TOP_RIGHT,
         });
       } else {

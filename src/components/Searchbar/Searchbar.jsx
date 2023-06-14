@@ -21,7 +21,7 @@ import {
   handleSearchSubmit = e => {
     e.preventDefault();
     if (this.state.query.trim()=== '') {
-      toast.info('Search field is empty! Please enter a search word.');
+      toast.error('Search field is empty! Please enter a search word.');
       return;
     }
     this.props.onSubmit(this.state.query);
